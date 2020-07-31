@@ -8,9 +8,6 @@ app.use(cors({optionSuccessStatus: 200}));  // some legacy browsers choke on 204
 
 app.use(express.static('public'));
 
-app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
-});
 
 
 app.get("/api/hello", function (req, res) {
@@ -21,14 +18,22 @@ app.get('/api/whoami', (req, res)=>{
 	console.log(req.connection.remoteAddress);
 	console.log(req.header('x-forwarded-for'));
 	let result = {
-		"Software": req.headers['user-agent'],
-		"Language": req.headers['accept-language']
-
+		ipaddress: req.header('x-forwarded-for').split(",")[0],
+		language: req.headers['accept-language'],
+		software: req.headers['user-agent']
 	}
 	console.log(result)
+	res.json(result);
+});
 
-	res.send("HELLO")
+app.get('/api/whoami/*', (req, res)=>{
+	res.redirect('/api/whoami');
 })
+
+
+app.get("/*", function (req, res) {
+  res.sendFile(__dirname + '/views/index.html');
+});
 
 var listener = app.listen(process.env.PORT || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
